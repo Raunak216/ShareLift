@@ -35,15 +35,7 @@ app.use(errorHandler);
 const port = process.env.PORT || 8080;
 const dbURL = process.env.MONGO_URL;
 
-// app.get("/send-email", async (req, res) => {
-//   try {
-//     await sendMail();
-//     res.send("Email sent successfully!");
-//   } catch (error) {
-//     console.error("Error:", error);
-//     res.status(500).send("Failed to send email.");
-//   }
-// });
+
 async function main() {
   try {
     await mongoose.connect(dbURL);
