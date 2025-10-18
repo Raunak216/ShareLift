@@ -5,10 +5,27 @@ import { jwtDecode } from "jwt-decode";
 import { User } from "../models/UserModal.js";
 import jwt from "jsonwebtoken";
 
+export const getGoogleOAuthUrl = (req, res) => {
+  const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+  const options = {
+    redirect_uri: process.env.GOOGLE_OAUTH_REDIRECT_URL,
+    client_id: process.env.CLIENT_ID,
+    access_type: "offline",
+    response_type: "code",
+    prompt: "consent",
+    scope: [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile",
+    ].join(" "),
+  };
+  const queryStr = new URLSearchParams(options).toString();
+  const authUrl = `${rootUrl}?${queryStr}`;
+  return res.redirect(authUrl);
+};
 /**
  * Exchange authorization code for Google tokens
  */
-const googleAuthToken = async (code) => {
+export const googleAuthToken = async (code) => {
   const url = "https://oauth2.googleapis.com/token";
   const postValues = {
     code,

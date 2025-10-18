@@ -35,7 +35,6 @@ app.use(errorHandler);
 const port = process.env.PORT || 8080;
 const dbURL = process.env.MONGO_URL;
 
-
 async function main() {
   try {
     await mongoose.connect(dbURL);

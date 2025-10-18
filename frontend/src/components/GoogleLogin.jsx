@@ -1,10 +1,10 @@
 import { useState } from "react";
 import Modal from "./modal";
 import getGoogleUrl from "../utils/getGoogleUrl";
+import axios from "axios";
 function GoogleLogin({ open, onclose }) {
-  const googleLogin = () => {
-    const authUrl = getGoogleUrl();
-    window.location.href = authUrl;
+  const googleLogin = async () => {
+    window.location.href = `${process.env.REACT_APP_SERVER_ENDPOINT}/api/auth/google`;
   };
   return (
     <>
