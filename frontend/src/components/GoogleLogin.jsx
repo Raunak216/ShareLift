@@ -4,7 +4,10 @@ import getGoogleUrl from "../utils/getGoogleUrl";
 import axios from "axios";
 function GoogleLogin({ open, onclose }) {
   const googleLogin = async () => {
-    window.location.href = `${process.env.REACT_APP_SERVER_ENDPOINT}/api/auth/google`;
+    const serverEndpoint =
+      process.env.REACT_APP_SERVER_ENDPOINT ||
+      "https://sharelift-backend1-557676259557.asia-south1.run.app";
+    window.location.href = `${serverEndpoint}/api/auth/google`;
   };
   return (
     <>
