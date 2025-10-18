@@ -31,6 +31,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(userRouter);
 app.use(rideReqRouter);
 app.use(groupRouter);
+app.get("/test-env", (req, res) => {
+  res.json({
+    client_id: process.env.CLIENT_ID,
+    redirect_uri: process.env.GOOGLE_OAUTH_REDIRECT_URL,
+  });
+});
+
 app.use(errorHandler);
 const port = process.env.PORT || 8080;
 const dbURL = process.env.MONGO_URL;
