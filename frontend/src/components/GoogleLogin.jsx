@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Modal from "./modal";
 import getGoogleUrl from "../utils/getGoogleUrl";
-import axios from "axios";
+import axios from "../axiosConfig.js";
 function GoogleLogin({ open, onclose }) {
   const googleLogin = async () => {
     const serverEndpoint =

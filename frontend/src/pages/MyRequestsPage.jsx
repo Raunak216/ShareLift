@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import NavBar from "../components/Navbar";
 import { useAuth } from "../Contexts/AuthContext";
 import { Clock, MapPin, Users, CheckCircle } from "lucide-react";
-import axios from "axios";
+import axios from "../axiosConfig.js";
 
 const ActiveRequestCard = ({ request, user }) => {
   const { direction, journeyDate, journeyTime, status, totalSeats } = request;

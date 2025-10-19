@@ -17,6 +17,7 @@ const FRONTEND_URL = process.env.FRONTEND_HOME_URL || "http://localhost:3000";
 
 const app = express();
 app.use(cookieParser());
+app.set("trust proxy", 1);
 app.use(
   cors({
     origin: FRONTEND_URL,

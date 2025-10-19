@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../Contexts/AuthContext";
 import GoogleLogin from "../components/GoogleLogin";
-import axios from "axios";
+import axios from "../axiosConfig.js";
 import Alert from "./Alert";
 import { useForm } from "react-hook-form";
 
