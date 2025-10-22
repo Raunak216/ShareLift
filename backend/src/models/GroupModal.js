@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-
 const { Schema } = mongoose;
-
 const GroupSchema = new Schema({
   direction: { type: String, required: true },
   journeyDate: { type: Date, required: true },
@@ -20,7 +18,7 @@ const GroupSchema = new Schema({
     enum: ["forming", "finalized", "cancelled", "expired/Partial"],
     default: "forming",
   },
-  createdAt: { type: Date, default: Date.now }, //groupCreated time
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Group = mongoose.model("Group", GroupSchema);

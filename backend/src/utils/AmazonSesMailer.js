@@ -93,7 +93,7 @@ ${groupMembers
     throw new Error("Failed to send confirmation email");
   }
 }
-
+//------------------------------------------------------------
 async function sendRegretMail({
   recipientEmail,
   userName,
@@ -255,4 +255,60 @@ You can contact them to coordinate your journey.
   }
 }
 
-export { sendGroupFormedMail, sendRegretMail, sendPartialGroupFormed };
+//--------------------------------------------------
+async function ContactMeMail({ recipientEmail, userName, message }) {
+  const sesClient = new SESClient({
+    region: "ap-south-1",
+    credentials: {
+      accessKeyId: process.env.SES_ACCESS_KEY_ID,
+      secretAccessKey: process.env.SES_SECRET_KEY,
+    },
+  });
+
+  const htmlBody = `
+  <div style="font-family:Arial, sans-serif; color:#333; background:#f9f9f9; padding:20px;">
+    <div style="max-width:600px; margin:auto; background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+      <h2 style="color:#2b6cb0;"> Review / complaint from user </h2>
+      <p>username : ${userName}</p>
+      <p>email : ${recipientEmail}</p>
+      <p>${message}</p>
+      
+    </div>
+  </div>`;
+
+  const textBody = `
+Username: ${userName}
+Email: ${recipientEmail}
+
+Message:
+${message}
+`;
+
+  const params = {
+    Destination: { ToAddresses: ["raunakzyx2@gmail.com"] },
+    Message: {
+      Body: {
+        Html: { Data: htmlBody },
+        Text: { Data: textBody },
+      },
+      Subject: { Data: "ShareLift User review/complaint" },
+    },
+    Source: "noreply@sharelift.in",
+  };
+
+  try {
+    const data = await sesClient.send(new SendEmailCommand(params));
+    console.log("Email sent successfully:", data.MessageId);
+  } catch (err) {
+    console.error("Error sending email:", err);
+    throw new Error("Failed to send Contact me email");
+  }
+}
+//--------------------------------------------------
+
+export {
+  sendGroupFormedMail,
+  sendRegretMail,
+  sendPartialGroupFormed,
+  ContactMeMail,
+};

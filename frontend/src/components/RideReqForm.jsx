@@ -4,20 +4,14 @@ import GoogleLogin from "../components/GoogleLogin";
 import axios from "../axiosConfig.js";
 import Alert from "./Alert";
 import { useForm } from "react-hook-form";
+import useAlert from "../utils/useAlert.js";
 
 function RideRequestForm() {
   const { user, isLoggedIn } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
-
-  const [alert, setAlert] = useState({
-    isVisible: false,
-    message: "",
-    type: "info",
-  });
-  const displayAlert = (message, type) => {
-    setAlert({ isVisible: true, message, type });
-    setTimeout(() => setAlert((prev) => ({ ...prev, isVisible: false })), 3000);
-  };
+  const [selectedDirection, setSelectedDirection] = useState("");
+  const [goingFromVit, setGoingFromVit] = useState(true);
+  const { alertState, displayAlert, hideAlert } = useAlert(3000);
 
   const onSubmit = async (formData) => {
     if (isLoggedIn && user) {
@@ -32,10 +26,13 @@ function RideRequestForm() {
       } catch (e) {
         const status = e.response ? e.response.status : 503;
         const message = e.response ? e.response.data.message : "Network Error.";
-        if (status === 409) displayAlert(message, "error");
-        else if (status === 400)
+        if (status === 409) {
+          displayAlert(message, "error");
+        } else if (status === 400) {
           displayAlert(message || "Missing required data.", "error");
-        else displayAlert(message, "error");
+        } else {
+          displayAlert(message, "error");
+        }
       }
     } else {
       setShowLoginModal(true);
@@ -48,13 +45,23 @@ function RideRequestForm() {
     formState: { errors, isSubmitting },
   } = useForm();
 
+  const handleDirectionChange = (e) => {
+    const value = e.target.value;
+    setSelectedDirection(value);
+    if (value && value.toLowerCase().startsWith("vit")) {
+      setGoingFromVit(true);
+    } else {
+      setGoingFromVit(false);
+    }
+  };
+
   return (
-    <div className="w-full flex justify-center  items-start p-3">
-      {alert.isVisible && (
+    <div className="w-full flex justify-center  items-start ">
+      {alertState.isVisible && (
         <Alert
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert((prev) => ({ ...prev, isVisible: false }))}
+          message={alertState.message}
+          type={alertState.type}
+          onClose={hideAlert}
         />
       )}
 
@@ -63,7 +70,7 @@ function RideRequestForm() {
           onSubmit={handleSubmit(onSubmit)}
           className="card-form w-full p-4 sm:p-5 space-y-2"
         >
-          <h2 className="text-lg sm:text-xl font-semibold text-center text-white mb-1">
+          <h2 className="text-xl sm:text-xl font-semibold text-center text-white mb-1">
             Search Travelmates
           </h2>
 
@@ -74,6 +81,10 @@ function RideRequestForm() {
             </label>
             <select
               {...register("direction", { required: true })}
+              onChange={(e) => {
+                register("direction").onChange(e);
+                handleDirectionChange(e);
+              }}
               className="w-full border border-white/20 rounded-md px-2 py-1.5 text-sm bg-white/6 text-white focus:ring-2 focus:ring-cyan-400"
             >
               <option value="">Select direction</option>
@@ -89,7 +100,7 @@ function RideRequestForm() {
             )}
           </div>
 
-          {/* Date & Time (compact grid) */}
+          {/* Date & Time  */}
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-200 mb-1">
@@ -133,6 +144,7 @@ function RideRequestForm() {
               {...register("vehicleCapacity", { required: true })}
               className="w-full border border-white/20 rounded-md px-2 py-1.5 text-sm bg-white/6 text-white focus:ring-2 focus:ring-cyan-400"
             >
+              <option value={2}>Cab (2 seats)</option>
               <option value={3}>Cab (3 seats)</option>
               <option value={4}>Cab (4 seats)</option>
               <option value={2}>Auto (2 seats)</option>
@@ -143,6 +155,7 @@ function RideRequestForm() {
           </div>
 
           {/* Tolerance */}
+
           <div>
             <label className="block text-xs font-medium text-gray-200 mb-1">
               Flexibility
@@ -151,7 +164,14 @@ function RideRequestForm() {
               {...register("tolerance", { required: true })}
               className="w-full border border-white/20 rounded-md px-2 py-1.5 text-sm bg-white/6 text-white focus:ring-2 focus:ring-cyan-400"
             >
-              <option value="">How much earlier can you start? </option>
+              {goingFromVit ? (
+                <option value="">How early can you start your journey? </option>
+              ) : (
+                <option value="">
+                  How long are you willing to wait for others?
+                </option>
+              )}
+
               <option value="30">30 mins</option>
               <option value="60">1 hour</option>
               <option value="120">2 hours</option>
@@ -172,7 +192,7 @@ function RideRequestForm() {
             <input
               {...register("phone", { required: true })}
               type="tel"
-              placeholder="for travelmates to connect with you"
+              placeholder="shared only with your travelmates"
               className="w-full border border-white/20 rounded-md px-2 py-1.5 text-sm bg-white/6 text-white focus:ring-2 focus:ring-cyan-400"
             />
             {errors.phone && (

@@ -10,6 +10,9 @@ module.exports = {
       colors: {
         neongreen: "#0FFF50", // Or '#39FF14'
       },
+      screens: {
+        xs: "480px",
+      },
     },
   },
   plugins: [],

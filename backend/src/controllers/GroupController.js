@@ -1,4 +1,3 @@
-// controllers/GroupController.js
 import { Group } from "../models/GroupModal.js";
 import { RideReq } from "../models/RideReqModal.js";
 import { User } from "../models/UserModal.js";
@@ -62,9 +61,9 @@ const finalizeGroupIfFull = async (group) => {
       }
     }
 
-    console.log("✅ Group finalized and members notified");
+    console.log(" Group finalized and members notified");
   } catch (err) {
-    console.error("❌ Error finalizing group:", err);
+    console.error("Error finalizing group:", err);
   }
 };
 
@@ -74,6 +73,8 @@ const makeGroup = async (newRequest) => {
     journeyDate: newRequest.journeyDate,
     status: "forming",
   });
+
+  const isGoingFromVIT = newRequest.direction.toLowerCase().startsWith("vit");
 
   for (let group of allGroups) {
     const groupTime = new Date(
@@ -86,25 +87,48 @@ const makeGroup = async (newRequest) => {
     );
     const diffMins = (groupTime - reqTime) / (1000 * 60);
 
-    if (diffMins >= 0 && diffMins <= group.tolerance) {
-      group.journeyTime = newRequest.journeyTime;
-      group.tolerance = group.tolerance - diffMins;
-      group.members.push({
-        userId: newRequest.userId,
-        requestId: newRequest._id,
-      });
-      await group.save();
-      await finalizeGroupIfFull(group);
-      return group;
-    } else if (diffMins < 0 && Math.abs(diffMins) <= newRequest.tolerance) {
-      group.tolerance = newRequest.tolerance - Math.abs(diffMins);
-      group.members.push({
-        userId: newRequest.userId,
-        requestId: newRequest._id,
-      });
-      await group.save();
-      await finalizeGroupIfFull(group);
-      return group;
+    if (isGoingFromVIT) {
+      if (diffMins >= 0 && diffMins <= group.tolerance) {
+        group.journeyTime = newRequest.journeyTime;
+        group.tolerance = group.tolerance - diffMins;
+        group.members.push({
+          userId: newRequest.userId,
+          requestId: newRequest._id,
+        });
+        await group.save();
+        await finalizeGroupIfFull(group);
+        return group;
+      } else if (diffMins < 0 && Math.abs(diffMins) <= newRequest.tolerance) {
+        group.tolerance = newRequest.tolerance - Math.abs(diffMins);
+        group.members.push({
+          userId: newRequest.userId,
+          requestId: newRequest._id,
+        });
+        await group.save();
+        await finalizeGroupIfFull(group);
+        return group;
+      }
+    } else {
+      if (diffMins <= 0 && Math.abs(diffMins) <= group.tolerance) {
+        group.journeyTime = newRequest.journeyTime;
+        group.tolerance = group.tolerance - Math.abs(diffMins);
+        group.members.push({
+          userId: newRequest.userId,
+          requestId: newRequest._id,
+        });
+        await group.save();
+        await finalizeGroupIfFull(group);
+        return group;
+      } else if (diffMins > 0 && diffMins <= newRequest.tolerance) {
+        group.tolerance = newRequest.tolerance - diffMins;
+        group.members.push({
+          userId: newRequest.userId,
+          requestId: newRequest._id,
+        });
+        await group.save();
+        await finalizeGroupIfFull(group);
+        return group;
+      }
     }
   }
 
@@ -135,7 +159,7 @@ const getActiveGroup = asyncHandler(async (req, res, next) => {
   res.status(200).json({ request: null });
 });
 
-//  CRON JOB —
+//  CRON JOB —  ERROR
 cron.schedule("*/30 * * * *", async () => {
   const now = new Date();
 

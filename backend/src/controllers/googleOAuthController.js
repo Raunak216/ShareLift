@@ -22,9 +22,8 @@ export const getGoogleOAuthUrl = (req, res) => {
   const authUrl = `${rootUrl}?${queryStr}`;
   return res.redirect(authUrl);
 };
-/**
- * Exchange authorization code for Google tokens
- */
+
+// Exchange authorization code for Google tokens
 export const googleAuthToken = async (code) => {
   const url = "https://oauth2.googleapis.com/token";
   const postValues = {
@@ -42,9 +41,8 @@ export const googleAuthToken = async (code) => {
   return res.data;
 };
 
-/**
- * Handle OAuth callback from Google
- */
+//Handle OAuth callback from Google
+
 const googleAuthHandler = async (req, res, next) => {
   const code = req.query.code;
   if (!code) {
@@ -52,33 +50,33 @@ const googleAuthHandler = async (req, res, next) => {
   }
 
   try {
-    // Step 1: Exchange code for tokens
+    //  Exchange code for tokens
     const tokenData = await googleAuthToken(code);
     const { id_token } = tokenData;
     const googleUser = jwtDecode(id_token);
 
-    // Step 2: Extract user data
+    //  Extract user data
     const userData = {
       email: googleUser.email,
       name: googleUser.given_name,
       regNo: googleUser.family_name,
     };
 
-    // Step 3: Restrict to VIT users if needed
+    //  Restrict to VIT users if needed
     // if (googleUser.hd !== "vitstudent.ac.in") {
     //   return res.status(401).json({
     //     message: "Access denied. Only @vitstudent.ac.in accounts are supported.",
     //   });
     // }
 
-    // Step 4: Create or update user in DB
+    //   update user DB
     const updatedUser = await User.findOneAndUpdate(
       { email: googleUser.email },
       { $set: userData },
       { upsert: true, new: true }
     );
 
-    // Step 5: Create JWT tokens
+    //  JWT token
     const appToken = jwt.sign(
       { userId: updatedUser._id, email: updatedUser.email },
       process.env.JWT_SECRET,
@@ -91,30 +89,29 @@ const googleAuthHandler = async (req, res, next) => {
       { expiresIn: "7d" }
     );
 
-    // Step 6: Set cookies
+    //  cookies
     const isProd = process.env.NODE_ENV === "production";
 
     res.cookie("app_session", appToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge: 3600000, // 1 hour
+      maxAge: 3600000,
     });
 
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge: 604800000, // 7 days
+      maxAge: 604800000,
     });
 
-    // Step 7: Redirect user to frontend
+    //  Redirect to frontend
     const FRONTEND_HOME_URL =
       process.env.FRONTEND_HOME_URL || "http://localhost:3000";
 
     return res.redirect(FRONTEND_HOME_URL);
   } catch (err) {
-    // Pass all unhandled errors to the middleware
     next(err);
   }
 };

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 
 const typeWritterData = [
-  "Going home for Diwali holidays?",
+  "Comming back to vit after diwali holiday?",
   "Looking for travelMates to split up fare?",
-  "Find fellow VITians going your way!",
+  "Connect with vitians going your route!",
 ];
 
 const TYPING_SPEED = 100;
@@ -44,14 +44,14 @@ function Typewriter() {
 
   return (
     <div className="w-full max-w-full text-left noto-serif-typeWritter font-extrabold text-cyan-400">
-      {/* For larger screens */}
+      {/* larger screens */}
       <div className="hidden md:block w-full text-2xl lg:text-3xl xl:text-5xl whitespace-nowrap overflow-visible h-8 mb-12 lg:h-10 xl:h-12">
         {text}
         <span className="text-gray-200 animate-blink pl-1">|</span>
       </div>
 
-      {/* For mobile screens */}
-      <div className="md:hidden w-full mt-30 text-2xl sm:text-2xl whitespace-normal break-words leading-tight min-h-[5rem]">
+      {/*  mobile screens */}
+      <div className="md:hidden w-full mt-30 text-3xl sm:text-2xl whitespace-normal break-words leading-tight min-h-[5rem]">
         <span className="inline">
           {text}
           <span className="text-gray-200 animate-blink pl-1">|</span>

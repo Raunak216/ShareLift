@@ -1,6 +1,5 @@
 import React from "react";
 const Alert = ({ message, type, onClose }) => {
-  // Determine Tailwind classes based on the alert type
   let colorClasses = "";
   if (type === "success") {
     colorClasses = "bg-green-100 border-green-400 text-green-700";
@@ -11,7 +10,6 @@ const Alert = ({ message, type, onClose }) => {
   }
 
   return (
-    // Fixed positioning to appear on top
     <div
       className={`fixed top-5 right-5 z-[100] border px-4 py-3 rounded shadow-lg ${colorClasses}`}
       role="alert"
@@ -20,7 +18,6 @@ const Alert = ({ message, type, onClose }) => {
         <strong className="font-bold mr-2">{type.toUpperCase()}:</strong>
         <span className="block sm:inline">{message}</span>
 
-        {/* Close Button */}
         {onClose && (
           <button
             onClick={onClose}

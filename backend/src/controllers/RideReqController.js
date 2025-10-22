@@ -1,4 +1,3 @@
-// controllers/RideReqController.js
 import httpStatus from "http-status";
 import { RideReq } from "../models/RideReqModal.js";
 import { makeGroup } from "./GroupController.js";

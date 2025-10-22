@@ -8,9 +8,8 @@ function NavBar() {
   const { user, isLoggedIn, isLoading } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Guard clause for loading state
   if (isLoading) {
-    return null; // Or a simple loading bar/spinner
+    return null;
   }
 
   return (

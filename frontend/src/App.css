@@ -5,7 +5,6 @@
   padding: 0;
   background-color: #000;
   color: #fff;
-  /* z-index: -10; */
 }
 @keyframes gradientShift {
   0%,

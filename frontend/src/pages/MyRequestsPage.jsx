@@ -3,6 +3,7 @@ import NavBar from "../components/Navbar";
 import { useAuth } from "../Contexts/AuthContext";
 import { Clock, MapPin, Users, CheckCircle } from "lucide-react";
 import axios from "../axiosConfig.js";
+import { LoadingAnimation } from "../components/loader.jsx";
 
 const ActiveRequestCard = ({ request, user }) => {
   const { direction, journeyDate, journeyTime, status, totalSeats } = request;
@@ -141,13 +142,9 @@ function MyRequestPage() {
   }, [isLoggedIn]);
 
   if (isLoading || loadingRequest) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-gradient-animate">
-        <h1 className="text-lg md:text-xl font-bold text-white text-center px-4">
-          Loading your requests...
-        </h1>
-      </div>
-    );
+    <div className="min-h-screen w-screen flex items-center justify-center bg-[#070A10]">
+      <LoadingAnimation />
+    </div>;
   }
 
   if (!isLoggedIn) {

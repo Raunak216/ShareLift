@@ -4,7 +4,7 @@ export const protect = (req, res, next) => {
   try {
     const token = req.cookies?.app_session;
     if (!token) {
-      return res.status(401).json({ message: "No authentication token found" });
+      return res.status(401).json({ message: "Please login to continue" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -16,6 +16,6 @@ export const protect = (req, res, next) => {
         .status(401)
         .json({ message: "Session expired, please log in again." });
     }
-    next(err); // Pass to global error handler for logging
+    next(err);
   }
 };

@@ -6,12 +6,18 @@ import { motion } from "framer-motion";
 import CabServicesCarousal from "../components/CabServicesCarousal";
 import Typewriter from "../components/TypeWritter";
 import { FooterComponent } from "../components/FooterComponent";
+import { LoadingAnimation } from "../components/loader";
+import DeviceBlocker from "../components/deviceBlocker";
 
 function LandingPage() {
   const { user, isLoggedIn, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>; // Consider a more styled loader here
+    return (
+      <div className="min-h-screen w-screen flex items-center justify-center bg-[#070A10]">
+        <LoadingAnimation />
+      </div>
+    );
   }
   const handleScroll = () => {
     window.scrollBy({
@@ -28,6 +34,7 @@ function LandingPage() {
         <div className="gradient gradient-2"></div>
         <div className="gradient gradient-3"></div>
       </div>
+      <DeviceBlocker />
       <NavBar />
 
       <main className="mx-auto px-4 py-2 md:px-9">
@@ -95,7 +102,6 @@ function LandingPage() {
           </motion.div>
         </div>
       </main>
-
       <CabServicesCarousal />
       <FooterComponent />
     </div>
