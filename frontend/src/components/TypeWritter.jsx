@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const typeWritterData = [
   "Comming back to vit after diwali holiday?",
-  "Looking for travelMates to split up fare?",
+  "Looking for travel mates to split up fare?",
   "Connect with vitians going your route!",
 ];
 
@@ -45,7 +45,7 @@ function Typewriter() {
   return (
     <div className="w-full max-w-full text-left noto-serif-typeWritter font-extrabold text-cyan-400">
       {/* larger screens */}
-      <div className="hidden md:block w-full text-2xl lg:text-3xl xl:text-5xl whitespace-nowrap overflow-visible h-8 mb-12 lg:h-10 xl:h-12">
+      <div className="hidden md:block w-full text-2xl lg:text-4xl xl:text-5xl whitespace-nowrap overflow-visible h-8 mb-12 lg:h-10 xl:h-12">
         {text}
         <span className="text-gray-200 animate-blink pl-1">|</span>
       </div>

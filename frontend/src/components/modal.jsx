@@ -6,7 +6,6 @@ export default function Modal({ open, onclose, children }) {
         className={`fixed flex justify-center items-center inset-0 transition-colors z-[100]
                      ${open ? "visible bg-black/40" : "invisible"}`}
       >
-        {/* modal */}
         <div
           onClick={(e) => e.stopPropagation()}
           className={`bg-[rgba(249,247,247)] rounded-xl shadow p-6 transition-all 

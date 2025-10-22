@@ -14,28 +14,26 @@ function NavBar() {
 
   return (
     <>
-      <nav className="w-full relative z-30 ">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="w-screen relative z-30">
+        <div className=" lg:mx-6 px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            {/* Logo Section */}
-            <div className="flex-shrink-0">
+            {/* Logo - Left Side */}
+            <div className="flex-shrink-0 flex items-center">
               <Link to={"/"}>
-                {/* Responsive logo height: h-16 on mobile, h-20 on desktop */}
                 <img
-                  className="h-16 md:h-20 ml-0 md:ml-4"
+                  className="h-16 md:h-20" // Consistent height
                   src="/Logo1.png"
                   alt="VIT TravelMate Finder Logo"
                 />
               </Link>
             </div>
 
-            {/* Links and Actions Section */}
-            <div className="flex items-center space-x-2 md:space-x-4">
-              {/* My Requests Link (Logged In) */}
+            {/* Navigation Items - Right Side */}
+            <div className="flex items-center space-x-4 md:space-x-6 lg:space-x-8">
               {user && isLoggedIn && (
                 <Link
                   to={"/api/groups/my"}
-                  className="p-1 md:p-2 m-1 md:m-3 transition duration-150 hover:bg-gray-700 rounded"
+                  className="px-4 py-2 transition duration-150 hover:bg-gray-700 rounded-lg"
                 >
                   <p className="text-yellow-400 text-lg md:text-2xl font-bold noto-serif-typeWritter whitespace-nowrap">
                     My Requests
@@ -43,13 +41,12 @@ function NavBar() {
                 </Link>
               )}
 
-              {/* Login Button (Logged Out) */}
               {!user && !isLoggedIn && (
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="p-1 md:p-2 m-1 md:m-3 "
+                  className="px-4 py-2 transition duration-150 hover:bg-gray-700 rounded-lg"
                 >
-                  <p className="text-yellow-500 text-lg md:text-2xl font-bold noto-serif-typeWritter whitespace-nowrap px-2">
+                  <p className="text-yellow-500 text-lg md:text-3xl font-bold noto-serif-typeWritter whitespace-nowrap">
                     Login
                   </p>
                 </button>
@@ -59,7 +56,6 @@ function NavBar() {
         </div>
       </nav>
 
-      {/* Login Modal */}
       {showLoginModal && (
         <GoogleLogin
           open={showLoginModal}

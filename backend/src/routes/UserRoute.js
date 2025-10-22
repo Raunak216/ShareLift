@@ -12,7 +12,7 @@ const router = Router();
 
 router.route("/api/auth/google").get(getGoogleOAuthUrl);
 router.route("/api/sessions/oauth/google").get(googleAuthHandler);
-router.route("/api/users/me").get(getMyDetailsHandler);
+router.route("/api/users/me").get(protect, getMyDetailsHandler);
 router.route("/api/auth/refresh").post(refreshAccessToken);
 router.route("/api/send-feedback").post(contactMe);
 

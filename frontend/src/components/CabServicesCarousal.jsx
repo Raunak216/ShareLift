@@ -14,7 +14,7 @@ function CabServicesCarousal() {
         setSlidesToShow(1);
       } else if (width <= 768) {
         setSlidesToShow(2);
-      } else if (width <= 1024) {
+      } else if (width <= 1424) {
         setSlidesToShow(3);
       } else {
         setSlidesToShow(4);
