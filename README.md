@@ -79,10 +79,10 @@ You can access the live, deployed applications here:
 ## 👨‍💻 Developer
 
 **Raunak Kumar**
-🎓 B.Tech @ VIT, Vellore **[space][space]**
+🎓 B.Tech @ VIT, Vellore                                                                                                                                                                                             
 💻 Passionate about MERN stack, cloud, and automation.
-**[space][space]**
-📫 Connect with me:
-[LinkedIn](https://www.linkedin.com/in/raunak-216k/) **[space][space]**
+
+📫 Connect with me:                                                                                                                                                      
+[LinkedIn](https://www.linkedin.com/in/raunak-216k/)                                                                                                                                                                 
 Email: raunak.kr216@gmail.com
  
