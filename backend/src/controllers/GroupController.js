@@ -1,9 +1,8 @@
 import { Group } from "../models/GroupModal.js";
 import { RideReq } from "../models/RideReqModal.js";
 import { User } from "../models/UserModal.js";
-import cron from "node-cron";
-import { sendGroupFormedMail } from "../utils/AmazonSesMailer.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import EmailQueue from "../models/EmailQueueModal.js";
 
 const directionMap = {
   vitToChennaiAir: "VIT-v → Chennai Airport",
@@ -42,26 +41,29 @@ const finalizeGroupIfFull = async (group) => {
         const u = await User.findById(m.userId).select("name email phone");
         return {
           name: u?.name || "Unknown",
-          email: u?.email || "Not Available",
-          phone: u?.phone || "Not Available",
+          email: u?.email || "NotAvailable",
+          phone: u?.phone || "0000000000",
         };
       })
     );
 
     for (const member of groupMembers) {
-      if (member.email && member.email !== "Not Available") {
-        await sendGroupFormedMail({
-          recipientEmail: member.email,
+      if (!member.email || member.email === "NotAvailable") continue;
+
+      await EmailQueue.create({
+        recipientEmail: member.email,
+        emailType: "GROUP_FORMED",
+        payload: {
           userName: member.name,
           journeyDirection,
           journeyDate,
           journeyTime,
           groupMembers,
-        });
-      }
+        },
+      });
     }
 
-    console.log(" Group finalized and members notified");
+    console.log("Queued GROUP_FORMED emails for group");
   } catch (err) {
     console.error("Error finalizing group:", err);
   }
@@ -72,6 +74,7 @@ const makeGroup = async (newRequest) => {
     direction: newRequest.direction,
     journeyDate: newRequest.journeyDate,
     status: "forming",
+    totalSeats: newRequest.vehicleCapacity,
   });
 
   const isGoingFromVIT = newRequest.direction.toLowerCase().startsWith("vit");
@@ -157,67 +160,6 @@ const getActiveGroup = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ request: null });
-});
-
-//  CRON JOB —  ERROR
-cron.schedule("*/30 * * * *", async () => {
-  const now = new Date();
-
-  try {
-    const formingGroups = await Group.find({ status: "forming" });
-
-    for (let group of formingGroups) {
-      const createdAt = new Date(group.createdAt);
-      const groupTime = new Date(
-        `${group.journeyDate.toISOString().split("T")[0]} ${group.journeyTime}`
-      );
-
-      const totalTimeGap = groupTime.getTime() - createdAt.getTime();
-
-      const eightyPercentTime = new Date(
-        createdAt.getTime() + 0.8 * totalTimeGap
-      );
-
-      const twoHoursBeforeJourney = new Date(
-        groupTime.getTime() - 2 * 60 * 60 * 1000
-      );
-
-      const expiryTime =
-        eightyPercentTime < twoHoursBeforeJourney
-          ? eightyPercentTime
-          : twoHoursBeforeJourney;
-
-      if (expiryTime <= now) {
-        if (group.members.length > 1) {
-          const memberDetails = await Promise.all(
-            group.members.map(async (m) => {
-              const u = await User.findById(m.userId).select(
-                "name email phone"
-              );
-              return { name: u.name, email: u.email, phone: u.phone };
-            })
-          );
-          await sendPartialGroupFormed(memberDetails, group);
-        } else {
-          for (const member of group.members) {
-            const u = await User.findById(member.userId).select("name email");
-            await sendRegretMail({
-              recipientEmail: u.email,
-              userName: u.name,
-              journeyDirection: group.direction,
-              journeyDate: group.journeyDate,
-              journeyTime: group.journeyTime,
-            });
-          }
-        }
-
-        group.status = "expired/Partial";
-        await group.save();
-      }
-    }
-  } catch (err) {
-    console.error("Error running partial group cron:", err);
-  }
 });
 
 export { makeGroup, getActiveGroup };

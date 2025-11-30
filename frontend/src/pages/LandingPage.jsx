@@ -1,4 +1,3 @@
-import React from "react"; // Removed unused imports
 import NavBar from "../components/Navbar";
 import RideRequestForm from "../components/RideReqForm";
 import { useAuth } from "../Contexts/AuthContext";
@@ -8,6 +7,7 @@ import Typewriter from "../components/TypeWritter";
 import { FooterComponent } from "../components/FooterComponent";
 import { LoadingAnimation } from "../components/loader";
 import DeviceBlocker from "../components/deviceBlocker";
+import FaqSection from "../components/FaqSection";
 
 function LandingPage() {
   const { user, isLoggedIn, isLoading } = useAuth();
@@ -103,6 +103,8 @@ function LandingPage() {
         </div>
       </main>
       <CabServicesCarousal />
+      <FaqSection />
+
       <FooterComponent />
     </div>
   );

@@ -144,10 +144,9 @@ function RideRequestForm() {
               {...register("vehicleCapacity", { required: true })}
               className="w-full border border-white/20 rounded-md px-2 py-1.5 text-sm bg-white/6 text-white focus:ring-2 focus:ring-cyan-400"
             >
-              <option value={2}>Cab (2 seats)</option>
-              <option value={3}>Cab (3 seats)</option>
-              <option value={4}>Cab (4 seats)</option>
-              <option value={2}>Auto (2 seats)</option>
+              <option value={3}>Cab - 3 seats (includes you)</option>
+              {/* <option value={4}>Cab - 4 seats (includes you)</option> */}
+              <option value={2}>Auto - 2 seats (includes you)</option>
             </select>
             {errors.vehicleCapacity && (
               <p className="text-red-400 text-[11px] mt-1">Required</p>
@@ -190,8 +189,15 @@ function RideRequestForm() {
               Contact No.
             </label>
             <input
-              {...register("phone", { required: true })}
+              {...register("phone", {
+                required: true,
+                pattern: {
+                  value: /^[0-9]{10}$/,
+                  message: "Phone must be exactly 10 digits",
+                },
+              })}
               type="tel"
+              maxLength={10}
               placeholder="shared only with your travelmates"
               className="w-full border border-white/20 rounded-md px-2 py-1.5 text-sm bg-white/6 text-white focus:ring-2 focus:ring-cyan-400"
             />

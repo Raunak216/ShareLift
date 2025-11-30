@@ -12,7 +12,6 @@ import cors from "cors";
 import rideReqRouter from "./routes/RideReqRoute.js";
 import userRouter from "./routes/UserRoute.js";
 import groupRouter from "./routes/GroupRoute.js";
-
 const FRONTEND_URL = process.env.FRONTEND_HOME_URL || "http://localhost:3000";
 
 const app = express();
@@ -32,12 +31,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(userRouter);
 app.use(rideReqRouter);
 app.use(groupRouter);
-app.get("/test-env", (req, res) => {
-  res.json({
-    client_id: process.env.CLIENT_ID,
-    redirect_uri: process.env.GOOGLE_OAUTH_REDIRECT_URL,
-  });
-});
+// app.get("/test-env", (req, res) => {
+//   res.json({
+//     client_id: process.env.CLIENT_ID,
+//     redirect_uri: process.env.GOOGLE_OAUTH_REDIRECT_URL,
+//   });
+// });
+
+import "./cron/emailWorker.js";
+import "./cron/partialEmailWorker.js";
 
 app.use(errorHandler);
 const port = process.env.PORT || 8080;

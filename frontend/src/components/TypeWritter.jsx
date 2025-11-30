@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 const typeWritterData = [
-  "Comming back to vit after diwali holiday?",
+  "Going home for winter holidays?",
   "Looking for travel mates to split up fare?",
   "Connect with vitians going your route!",
 ];

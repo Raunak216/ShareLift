@@ -38,7 +38,7 @@ function CabServicesCarousal() {
 
   return (
     <div className="w-full px-2 sm:px-4 md:px-8 lg:px-20 mx-auto mt-10">
-      <h2 className="text-2xl lg:text-3xl font-bold text-center text-yellow-400 ml-4 ">
+      <h2 className="text-2xl lg:text-3xl font-bold text-center text-cyan-500 ml-4 ">
         Cab services in Vellore
       </h2>
       <Slider {...settings}>
@@ -48,7 +48,7 @@ function CabServicesCarousal() {
               onClick={() => window.open(data.webPage, "_blank")}
               className="card-carousal w-70 ml-12 lg:ml-0 lg:w-full h-full p-4 md:p-3 lg:p-6 flex flex-col justify-between items-center rounded-xl shadow-lg cursor-pointer transform transition hover:scale-[1.02] hover:shadow-2xl border-b-4 border-cyan-400"
             >
-              <h1 className="text-xl lg:text-2xl font-bold text-cyan-300 mb-2">
+              <h1 className="text-xl lg:text-2xl font-bold text-yellow-400 mb-2">
                 {data.name}
               </h1>
 

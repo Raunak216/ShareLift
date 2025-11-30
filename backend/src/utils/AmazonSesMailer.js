@@ -1,98 +1,98 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-async function sendGroupFormedMail({
-  recipientEmail,
-  userName,
-  journeyDirection,
-  journeyDate,
-  journeyTime,
-  groupMembers,
-}) {
-  const sesClient = new SESClient({
-    region: "ap-south-1",
-    credentials: {
-      accessKeyId: process.env.SES_ACCESS_KEY_ID,
-      secretAccessKey: process.env.SES_SECRET_KEY,
-    },
-  });
+// async function sendGroupFormedMail({
+//   recipientEmail,
+//   userName,
+//   journeyDirection,
+//   journeyDate,
+//   journeyTime,
+//   groupMembers,
+// }) {
+//   const sesClient = new SESClient({
+//     region: "ap-south-1",
+//     credentials: {
+//       accessKeyId: process.env.SES_ACCESS_KEY_ID,
+//       secretAccessKey: process.env.SES_SECRET_KEY,
+//     },
+//   });
 
-  const memberListHTML = groupMembers
-    .map(
-      (m, i) => `
-      <tr>
-        <td style="padding:8px; border-bottom:1px solid #eee;">${i + 1}</td>
-        <td style="padding:8px; border-bottom:1px solid #eee;">${m.name}</td>
-        <td style="padding:8px; border-bottom:1px solid #eee;">${m.email}</td>
-        <td style="padding:8px; border-bottom:1px solid #eee;">${m.phone}</td>
-      </tr>`
-    )
-    .join("");
+//   const memberListHTML = groupMembers
+//     .map(
+//       (m, i) => `
+//       <tr>
+//         <td style="padding:8px; border-bottom:1px solid #eee;">${i + 1}</td>
+//         <td style="padding:8px; border-bottom:1px solid #eee;">${m.name}</td>
+//         <td style="padding:8px; border-bottom:1px solid #eee;">${m.email}</td>
+//         <td style="padding:8px; border-bottom:1px solid #eee;">${m.phone}</td>
+//       </tr>`
+//     )
+//     .join("");
 
-  const htmlBody = `
-  <div style="font-family:Arial, sans-serif; color:#333; background:#f9f9f9; padding:20px;">
-    <div style="max-width:600px; margin:auto; background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
-      <h2 style="color:#2b6cb0;"> Your ShareLift Group is Confirmed!</h2>
-      <p>Hi ${userName},</p>
-      <p>Your travel group has been successfully formed! Here are the details:</p>
-      <div style="margin:16px 0; padding:12px; background:#edf2f7; border-radius:6px;">
-        <strong>Direction:</strong> ${journeyDirection}<br/>
-        <strong>Date:</strong> ${journeyDate}<br/>
-        <strong>Time:</strong> ${journeyTime}
-      </div>
-      <p><strong>Group Members:</strong></p>
-      <table style="width:100%; border-collapse:collapse; font-size:14px;">
-        <thead>
-          <tr style="background:#f1f5f9;">
-            <th style="text-align:left; padding:8px;">#</th>
-            <th style="text-align:left; padding:8px;">Name</th>
-            <th style="text-align:left; padding:8px;">Email</th>
-            <th style="text-align:left; padding:8px;">Phone</th>
-          </tr>
-        </thead>
-        <tbody>${memberListHTML}</tbody>
-      </table>
-      <p style="margin-top:20px;">You can now contact your group members to coordinate your trip.</p>
-      <p style="font-size:13px; color:#555;">- The ShareLift Team</p>
-    </div>
-  </div>`;
+//   const htmlBody = `
+//   <div style="font-family:Arial, sans-serif; color:#333; background:#f9f9f9; padding:20px;">
+//     <div style="max-width:600px; margin:auto; background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+//       <h2 style="color:#2b6cb0;"> Your ShareLift Group is Confirmed!</h2>
+//       <p>Hi ${userName},</p>
+//       <p>Your travel group has been successfully formed! Here are the details:</p>
+//       <div style="margin:16px 0; padding:12px; background:#edf2f7; border-radius:6px;">
+//         <strong>Direction:</strong> ${journeyDirection}<br/>
+//         <strong>Date:</strong> ${journeyDate}<br/>
+//         <strong>Time:</strong> ${journeyTime}
+//       </div>
+//       <p><strong>Group Members:</strong></p>
+//       <table style="width:100%; border-collapse:collapse; font-size:14px;">
+//         <thead>
+//           <tr style="background:#f1f5f9;">
+//             <th style="text-align:left; padding:8px;">#</th>
+//             <th style="text-align:left; padding:8px;">Name</th>
+//             <th style="text-align:left; padding:8px;">Email</th>
+//             <th style="text-align:left; padding:8px;">Phone</th>
+//           </tr>
+//         </thead>
+//         <tbody>${memberListHTML}</tbody>
+//       </table>
+//       <p style="margin-top:20px;">You can now contact your group members to coordinate your trip.</p>
+//       <p style="font-size:13px; color:#555;">- The ShareLift Team</p>
+//     </div>
+//   </div>`;
 
-  const textBody = `
-Hi ${userName},
+//   const textBody = `
+// Hi ${userName},
 
-Your travel group has been successfully formed!
+// Your travel group has been successfully formed!
 
-Direction: ${journeyDirection}
-Date: ${journeyDate}
-Time: ${journeyTime}
+// Direction: ${journeyDirection}
+// Date: ${journeyDate}
+// Time: ${journeyTime}
 
-Group Members:
-${groupMembers
-  .map((m, i) => `${i + 1}. ${m.name} — ${m.email} | ${m.phone}`)
-  .join("\n")}
+// Group Members:
+// ${groupMembers
+//   .map((m, i) => `${i + 1}. ${m.name} — ${m.email} | ${m.phone}`)
+//   .join("\n")}
 
-– The ShareLift Team
-`;
+// – The ShareLift Team
+// `;
 
-  const params = {
-    Destination: { ToAddresses: [recipientEmail] },
-    Message: {
-      Body: {
-        Html: { Data: htmlBody },
-        Text: { Data: textBody },
-      },
-      Subject: { Data: "Your ShareLift Group is Confirmed" },
-    },
-    Source: "noreply@sharelift.in",
-  };
+//   const params = {
+//     Destination: { ToAddresses: [recipientEmail] },
+//     Message: {
+//       Body: {
+//         Html: { Data: htmlBody },
+//         Text: { Data: textBody },
+//       },
+//       Subject: { Data: "Your ShareLift Group is Confirmed" },
+//     },
+//     Source: "noreply@sharelift.in",
+//   };
 
-  try {
-    const data = await sesClient.send(new SendEmailCommand(params));
-    console.log("Email sent successfully:", data.MessageId);
-  } catch (err) {
-    console.error("Error sending email:", err);
-    throw new Error("Failed to send confirmation email");
-  }
-}
+//   try {
+//     const data = await sesClient.send(new SendEmailCommand(params));
+//     console.log("Email sent successfully:", data.MessageId);
+//   } catch (err) {
+//     console.error("Error sending email:", err);
+//     throw new Error("Failed to send confirmation email");
+//   }
+// }
 //------------------------------------------------------------
 async function sendRegretMail({
   recipientEmail,
@@ -123,7 +123,7 @@ async function sendRegretMail({
         <strong>Time:</strong> ${journeyTime}
       </div>
       <p>
-        
+
         We’ll continue improving our matching system to serve you better.
       </p>
       <p style="margin-top:16px;">Thank you for using <strong>ShareLift</strong>! 💙</p>
@@ -272,7 +272,7 @@ async function ContactMeMail({ recipientEmail, userName, message }) {
       <p>username : ${userName}</p>
       <p>email : ${recipientEmail}</p>
       <p>${message}</p>
-      
+
     </div>
   </div>`;
 
@@ -306,9 +306,4 @@ ${message}
 }
 //--------------------------------------------------
 
-export {
-  sendGroupFormedMail,
-  sendRegretMail,
-  sendPartialGroupFormed,
-  ContactMeMail,
-};
+export { sendRegretMail, sendPartialGroupFormed, ContactMeMail };

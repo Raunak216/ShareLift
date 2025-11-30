@@ -52,15 +52,30 @@ const refreshAccessToken = asyncHandler(async (req, res, next) => {
   });
 });
 
+const lastFeedbackTime = {};
+
 const contactMe = asyncHandler(async (req, res, next) => {
   const { recipientEmail, userName, message } = req.body;
+
   if (!userName || !recipientEmail || !message) {
-    const error = new Error("Missing feilds");
+    const error = new Error("Missing fields");
     error.statusCode = 400;
     throw error;
   }
 
+  const now = Date.now();
+  const lastTime = lastFeedbackTime[recipientEmail];
+
+  if (lastTime && now - lastTime < 2 * 60 * 60 * 1000) {
+    return res.status(429).json({
+      message: "Please wait some time before sending another feedback.",
+    });
+  }
+
+  lastFeedbackTime[recipientEmail] = now;
+
   await ContactMeMail({ recipientEmail, userName, message });
+
   res.status(200).json({ message: "Feedback sent successfully!" });
 });
 
