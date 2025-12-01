@@ -15,7 +15,7 @@ const EMAIL_TYPE_MAP = {
 };
 
 // Runs every 30 seconds
-cron.schedule("*/30 * * * * *", async () => {
+cron.schedule("*/60 * * * * *", async () => {
   console.log("Email Worker Running...");
 
   const todaysCount = await EmailLog.countDocuments({
@@ -26,7 +26,7 @@ cron.schedule("*/30 * * * * *", async () => {
   });
 
   if (todaysCount >= 450) {
-    console.log("📛 Daily limit reached — queue paused.");
+    console.log(" Daily limit reached — queue paused.");
     return;
   }
 
@@ -67,7 +67,7 @@ cron.schedule("*/30 * * * * *", async () => {
         }
       );
 
-      console.log("❌ Email Failed:", email.recipientEmail);
+      console.log(" Email Failed:", email.recipientEmail);
     }
   }
 });

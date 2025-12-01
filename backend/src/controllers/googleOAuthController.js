@@ -63,11 +63,11 @@ const googleAuthHandler = async (req, res, next) => {
     };
 
     //  Restrict to VIT users if needed
-    // if (googleUser.hd !== "vitstudent.ac.in") {
-    //   return res.status(401).json({
-    //     message: "Access denied. Only @vitstudent.ac.in accounts are supported.",
-    //   });
-    // }
+    if (googleUser.hd !== "vitstudent.ac.in") {
+      return res.redirect(
+        `${process.env.FRONTEND_HOME_URL}/auth-error?msg=only-vit-allowed`
+      );
+    }
 
     //   update user DB
     const updatedUser = await User.findOneAndUpdate(

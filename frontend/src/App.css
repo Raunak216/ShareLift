@@ -193,27 +193,18 @@ body {
   transform: translateY(-50%);
   width: 380px;
 }
-.card-form-container {
-  position: absolute;
-  right: 5%;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 380px;
-}
 
-/* ✅ Responsive Fixes */
-
-/* Small phones (up to 480px) */
+/* phones */
 @media (max-width: 480px) {
   .card-form-container {
-    position: static; /* Center naturally in flow */
+    position: static;
     transform: none;
     width: 90%;
     margin: 1rem auto;
   }
 }
 
-/* Tablets (481px to 768px) */
+/* Tablets  */
 @media (min-width: 481px) and (max-width: 768px) {
   .card-form-container {
     position: absolute;
@@ -224,7 +215,7 @@ body {
   }
 }
 
-/* Medium laptops (769px to 1024px) */
+/* Medium  */
 @media (min-width: 769px) and (max-width: 1024px) {
   .card-form-container {
     right: 4%;
@@ -232,7 +223,7 @@ body {
   }
 }
 
-/* Large screens (1025px and above) */
+/* Large screens  */
 @media (min-width: 1025px) {
   .card-form-container {
     right: 5%;
@@ -360,13 +351,6 @@ option:hover {
   border-radius: 10px;
   transition: all 0.3s ease;
 }
-/* Ensure slides size consistently and responsive breakpoints apply */
-/* .slick-slider .slick-slide {
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  height: auto;
-} */
 
 /* Make sure slick-loaded CSS is present (sometimes missing) */
 .slick-list {
