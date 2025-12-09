@@ -23,7 +23,6 @@ export const getGoogleOAuthUrl = (req, res) => {
   return res.redirect(authUrl);
 };
 
-// Exchange authorization code for Google tokens
 export const googleAuthToken = async (code) => {
   const url = "https://oauth2.googleapis.com/token";
   const postValues = {
@@ -41,8 +40,6 @@ export const googleAuthToken = async (code) => {
   return res.data;
 };
 
-//Handle OAuth callback from Google
-
 const googleAuthHandler = async (req, res, next) => {
   const code = req.query.code;
   if (!code) {
@@ -55,14 +52,13 @@ const googleAuthHandler = async (req, res, next) => {
     const { id_token } = tokenData;
     const googleUser = jwtDecode(id_token);
 
-    //  Extract user data
     const userData = {
       email: googleUser.email,
       name: googleUser.given_name,
       regNo: googleUser.family_name,
     };
 
-    //  Restrict to VIT users if needed
+    //  VIT users only
     if (googleUser.hd !== "vitstudent.ac.in") {
       return res.redirect(
         `${process.env.FRONTEND_HOME_URL}/auth-error?msg=only-vit-allowed`

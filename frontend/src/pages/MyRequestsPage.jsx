@@ -5,9 +5,11 @@ import { Clock, MapPin, Users, CheckCircle } from "lucide-react";
 import axios from "../axiosConfig.js";
 import { LoadingAnimation } from "../components/loader.jsx";
 
-const ActiveRequestCard = ({ request, user }) => {
-  const { direction, journeyDate, journeyTime, status, totalSeats } = request;
+const ActiveRequestCard = ({ request, user, onDeleteSuccess }) => {
+  const { direction, journeyDate, journeyTime, status, totalSeats, _id } =
+    request;
   const isPending = status === "pending";
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const directionMap = {
     vitToChennaiAir: "VIT-v → Chennai Airport",
@@ -16,7 +18,6 @@ const ActiveRequestCard = ({ request, user }) => {
     KatpadiRailToVit: "Katpadi Railway → VIT-v",
   };
 
-  // Convert date to human readable
   const readableDate = new Date(journeyDate).toLocaleDateString("en-IN", {
     weekday: "long",
     year: "numeric",
@@ -27,6 +28,32 @@ const ActiveRequestCard = ({ request, user }) => {
   const statusBadge = isPending
     ? "bg-yellow-300/20 text-yellow-200 border border-yellow-300/40"
     : "bg-green-400/20 text-green-100 border border-green-400/40";
+
+  const handleDelete = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to leave this group and cancel your request?"
+      )
+    ) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await axios.delete(`/api/rides/${_id}?userId=${user._id}`, {
+        withCredentials: true,
+      });
+
+      if (onDeleteSuccess) {
+        onDeleteSuccess();
+      }
+    } catch (error) {
+      console.error("Error cancelling ride:", error);
+      alert(error.response?.data?.message || "Failed to cancel request");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="relative w-full max-w-4xl mx-auto p-4 md:p-8 rounded-2xl md:rounded-3xl bg-white/10 backdrop-blur-2xl border border-white/20 shadow-lg transition-transform duration-300 hover:shadow-[0_0_25px_rgba(0,255,200,0.3)] z-10">
@@ -42,7 +69,6 @@ const ActiveRequestCard = ({ request, user }) => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-5">
-        {/* Left Section */}
         <div className="space-y-4 md:space-y-5 border-b md:border-b-0 md:border-r border-white/20 pb-6 md:pb-0 md:pr-8">
           <h4 className="text-base md:text-lg font-semibold text-white/90 mb-2 md:mb-3">
             Your Journey Plan
@@ -56,19 +82,32 @@ const ActiveRequestCard = ({ request, user }) => {
           <DetailRow Icon={CheckCircle} label="Date" value={readableDate} />
         </div>
 
-        {/* Right Section */}
         <div className="space-y-4 md:space-y-5 md:pl-8">
           <h4 className="text-base md:text-lg font-semibold text-white/90 mb-2 md:mb-3">
             Matching Status
           </h4>
-
-          <DetailRow Icon={Users} label="Seats Needed" value={totalSeats} />
+          <div className="flex justify-between">
+            <DetailRow Icon={Users} label="Total Seats" value={totalSeats} />
+            {/* {request.members.length === totalSeats ? (
+              <></>
+            ) : (
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className=" py-2 px-4  border border-green-400/40 text-white-500 font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed "
+              >
+                {isDeleting ? "Processing..." : "Leave Group "}
+              </button>
+            )} */}
+          </div>
 
           {isPending ? (
-            <p className="text-cyan-200 font-medium text-sm md:text-base">
-              Searching for Travelmates now... We will notify you with updates
-              on mail . Stay tuned!
-            </p>
+            <div className="space-y-4">
+              <p className="text-cyan-200 font-medium text-sm md:text-base">
+                Searching for Travelmates now... We will notify you with updates
+                on mail.
+              </p>
+            </div>
           ) : (
             <div className="space-y-3">
               <p className="font-semibold text-white/90 text-sm md:text-base">
@@ -141,10 +180,16 @@ function MyRequestPage() {
     }
   }, [isLoggedIn]);
 
+  const handleRideDeleted = () => {
+    setActiveRequest(null);
+  };
+
   if (isLoading || loadingRequest) {
-    <div className="min-h-screen w-screen flex items-center justify-center bg-[#070A10]">
-      <LoadingAnimation />
-    </div>;
+    return (
+      <div className="min-h-screen w-screen flex items-center justify-center bg-[#070A10]">
+        <LoadingAnimation />
+      </div>
+    );
   }
 
   if (!isLoggedIn) {
@@ -171,7 +216,11 @@ function MyRequestPage() {
         </h1>
 
         {activeRequest ? (
-          <ActiveRequestCard request={activeRequest} user={user} />
+          <ActiveRequestCard
+            request={activeRequest}
+            user={user}
+            onDeleteSuccess={handleRideDeleted}
+          />
         ) : (
           <div className="w-full max-w-xl p-4 md:p-6 rounded-xl md:rounded-2xl bg-white/10 backdrop-blur-xl text-center text-white/90 shadow-lg border border-white/20 mx-4">
             <p className="text-sm md:text-base">

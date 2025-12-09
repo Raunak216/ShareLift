@@ -14,7 +14,7 @@ const RideReqSchema = new Schema({
   tolerance: { type: Number, default: 60 },
   status: {
     type: String,
-    enum: ["pending", "matched", "cancelled"],
+    enum: ["pending", "formed", "cancelled"],
     default: "pending",
   },
   date: { type: Date, default: Date.now, required: true },

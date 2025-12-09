@@ -14,8 +14,7 @@ export default function ErrorPage() {
           </h1>
 
           <p className="text-gray-200 leading-relaxed text-sm sm:text-base">
-            We apologize for the inconvenience. An unexpected error occurred —
-            please try again later.
+            An unexpected error occurred - please try again later.
           </p>
 
           <p className="mt-3 text-xs sm:text-sm text-gray-400">

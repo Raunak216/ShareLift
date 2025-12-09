@@ -12,6 +12,12 @@ const cabData = [
     reviews: "4.5/5 of 800+ reviews",
   },
   {
+    name: "Red Taxi",
+    Contact: "Red taxi app",
+    webPage: "https://www.redtaxi.co.in/",
+    reviews: "4.8/5 of 500+ reviews",
+  },
+  {
     name: "Vellore Taxi Service",
     Contact: "958 553 3340",
     webPage: "https://www.velloretaxiservice.in/",
@@ -22,12 +28,6 @@ const cabData = [
     Contact: "962 679 8689",
     webPage: "https://www.calltaxivellore.com/",
     reviews: "4.8/5 of 350+ reviews",
-  },
-  {
-    name: "SM call taxi",
-    Contact: " 416 224 4666",
-    webPage: "https://smcalltaxi.in/",
-    reviews: "4.8/5 of 500+ reviews",
   },
 ];
 

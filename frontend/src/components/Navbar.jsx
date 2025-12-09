@@ -21,7 +21,7 @@ function NavBar() {
             <div className="flex-shrink-0 flex items-center">
               <Link to={"/"}>
                 <img
-                  className="h-16 md:h-20" // Consistent height
+                  className="h-16 md:h-20"
                   src="/Logo1.png"
                   alt="VIT TravelMate Finder Logo"
                 />
