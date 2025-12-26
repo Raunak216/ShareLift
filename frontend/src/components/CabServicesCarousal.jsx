@@ -39,7 +39,7 @@ function CabServicesCarousal() {
   return (
     <div className="w-full px-2 sm:px-4 md:px-8 lg:px-20 mx-auto mt-10">
       <h2 className="text-2xl lg:text-3xl font-bold text-center text-cyan-500 ml-4 ">
-        Cab services in Vellore
+        Cab Services in Vellore
       </h2>
       <Slider {...settings}>
         {cabData.map((data, index) => (

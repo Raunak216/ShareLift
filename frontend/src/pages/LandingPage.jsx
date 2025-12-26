@@ -54,9 +54,9 @@ function LandingPage() {
 
               <div className="space-y-4 mt-10 md:mt-0 md:space-y-6">
                 <p className="text-lg sm:text-xl md:text-2xl lg:text-2xl text-gray-300 leading-relaxed md:leading-relaxed ">
-                  Connect with verified VITians traveling the same route.
-                  <br className="  hidden md:block" /> Save money, share rides,
-                  and make your journey stress-free.
+                  Connect with VITians traveling the same route.
+                  <br className="  hidden md:block" /> Split the cab fare, save
+                  money, and enjoy a stress-free journey.
                 </p>
                 <p className="text-base sm:text-lg md:text-2xl lg:text-xl font-medium text-gray-100 leading-relaxed">
                   Start now - find your travel group in seconds.

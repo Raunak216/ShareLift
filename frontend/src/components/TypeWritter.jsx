@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 
 const typeWritterData = [
   "Winter holidays coming to an end?",
-  "Heading back to VIT and need to book a cab?",
-  "Looking for travel mates to split the fare?",
+  "Heading back to VIT - booking a cab?",
+  "Looking to split up the fare?",
 ];
 
 const TYPING_SPEED = 100;
