@@ -13,24 +13,35 @@ const requestRide = asyncHandler(async (req, res, next) => {
     vehicleCapacity,
     tolerance,
     phone,
+    transport,
+    trainNumber,
   } = req.body;
 
-  if (!direction || !journeyDate || !journeyTime || !phone) {
+  if (!direction || !journeyDate || !phone || !transport) {
     const error = new Error(
-      "Missing required fields: direction, journeyDate, journeyTime, phone"
+      "Missing required fields: direction, journeyDate, phone, transport"
     );
     error.statusCode = httpStatus.BAD_REQUEST;
     throw error;
   }
 
-  const parsedTolerance = Number(tolerance);
-  const parsedCapacity = Number(vehicleCapacity);
-  const parsedPhone = String(phone);
+  if (transport === "flight") {
+    if (!journeyTime || tolerance === undefined) {
+      const error = new Error(
+        "Missing required flight fields: journeyTime, tolerance"
+      );
+      error.statusCode = httpStatus.BAD_REQUEST;
+      throw error;
+    }
+  }
 
-  const finalTolerance = Number.isFinite(parsedTolerance)
-    ? parsedTolerance
-    : 60;
-  const finalCapacity = Number.isFinite(parsedCapacity) ? parsedCapacity : 3;
+  if (transport === "train") {
+    if (!trainNumber) {
+      const error = new Error("Missing required train fields: trainNumber");
+      error.statusCode = httpStatus.BAD_REQUEST;
+      throw error;
+    }
+  }
 
   const parsedDate = new Date(journeyDate);
   if (isNaN(parsedDate.getTime())) {
@@ -39,6 +50,16 @@ const requestRide = asyncHandler(async (req, res, next) => {
     throw error;
   }
 
+  const parsedCapacity = Number(vehicleCapacity);
+  const finalCapacity = Number.isFinite(parsedCapacity) ? parsedCapacity : 3;
+
+  const parsedTolerance = Number(tolerance);
+  const finalTolerance =
+    transport === "flight" && Number.isFinite(parsedTolerance)
+      ? parsedTolerance
+      : 0;
+  const parsedPhone = String(phone);
+
   const userId = req.userId;
   if (!userId) {
     const error = new Error("Not authenticated");
@@ -46,7 +67,6 @@ const requestRide = asyncHandler(async (req, res, next) => {
     throw error;
   }
   const now = new Date();
-
   const activeReq = await RideReq.findOne({
     userId,
     journeyDate: { $gte: now },
@@ -64,10 +84,12 @@ const requestRide = asyncHandler(async (req, res, next) => {
   const newRequest = new RideReq({
     userId,
     direction,
+    transport,
     journeyDate: parsedDate,
-    journeyTime,
+    journeyTime: transport === "flight" ? journeyTime : undefined,
+    trainNumber: transport === "train" ? trainNumber : undefined,
     vehicleCapacity: finalCapacity,
-    tolerance: finalTolerance,
+    tolerance: transport === "flight" ? finalTolerance : 0,
     status: "pending",
     createdAt: Date.now(),
   });

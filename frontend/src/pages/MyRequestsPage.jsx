@@ -6,8 +6,16 @@ import axios from "../axiosConfig.js";
 import { LoadingAnimation } from "../components/loader.jsx";
 
 const ActiveRequestCard = ({ request, user, onDeleteSuccess }) => {
-  const { direction, journeyDate, journeyTime, status, totalSeats, _id } =
-    request;
+  const {
+    direction,
+    journeyDate,
+    journeyTime,
+    status,
+    totalSeats,
+    _id,
+    transport,
+    trainNumber,
+  } = request;
   const isPending = status === "pending";
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -75,10 +83,15 @@ const ActiveRequestCard = ({ request, user, onDeleteSuccess }) => {
           </h4>
           <DetailRow
             Icon={MapPin}
-            label="Destination"
+            label="Direction"
             value={directionMap[request.direction] || request.direction}
           />
-          <DetailRow Icon={Clock} label="Time" value={journeyTime} />
+          {transport == "flight" ? (
+            <DetailRow Icon={Clock} label="Time" value={journeyTime} />
+          ) : (
+            <DetailRow Icon={Clock} label="Train Number" value={trainNumber} />
+          )}
+
           <DetailRow Icon={CheckCircle} label="Date" value={readableDate} />
         </div>
 

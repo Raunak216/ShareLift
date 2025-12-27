@@ -34,7 +34,6 @@ const finalizeGroupIfFull = async (group) => {
         day: "numeric",
       }
     );
-    const journeyTime = group.journeyTime || "Not specified";
 
     const groupMembers = await Promise.all(
       group.members.map(async (m) => {
@@ -57,7 +56,11 @@ const finalizeGroupIfFull = async (group) => {
           userName: member.name,
           journeyDirection,
           journeyDate,
-          journeyTime,
+          transport: group.transport,
+          journeyTime:
+            group.transport === "flight" ? group.journeyTime : undefined,
+          trainNumber:
+            group.transport === "train" ? group.trainNumber : undefined,
           groupMembers,
         },
       });
@@ -70,7 +73,42 @@ const finalizeGroupIfFull = async (group) => {
 };
 
 const makeGroup = async (newRequest) => {
+  //train logic
+  if (newRequest.transport === "train") {
+    const allGroups = await Group.find({
+      transport: "train",
+      direction: newRequest.direction,
+      journeyDate: newRequest.journeyDate,
+      trainNumber: newRequest.trainNumber,
+      status: "forming",
+      totalSeats: newRequest.vehicleCapacity,
+    });
+
+    for (let group of allGroups) {
+      group.members.push({
+        userId: newRequest.userId,
+        requestId: newRequest._id,
+      });
+      await group.save();
+      await finalizeGroupIfFull(group);
+      return group;
+    }
+    const newGroup = new Group({
+      transport: "train",
+      direction: newRequest.direction,
+      journeyDate: newRequest.journeyDate,
+      trainNumber: newRequest.trainNumber,
+      totalSeats: newRequest.vehicleCapacity,
+      status: "forming",
+      members: [{ userId: newRequest.userId, requestId: newRequest._id }],
+    });
+
+    await newGroup.save();
+    return newGroup;
+  }
+  //flight logic
   const allGroups = await Group.find({
+    transport: "flight",
     direction: newRequest.direction,
     journeyDate: newRequest.journeyDate,
     status: "forming",
@@ -88,54 +126,37 @@ const makeGroup = async (newRequest) => {
         newRequest.journeyTime
       }`
     );
+
     const diffMins = (groupTime - reqTime) / (1000 * 60);
 
     if (isGoingFromVIT) {
       if (diffMins >= 0 && diffMins <= group.tolerance) {
         group.journeyTime = newRequest.journeyTime;
-        group.tolerance = group.tolerance - diffMins;
-        group.members.push({
-          userId: newRequest.userId,
-          requestId: newRequest._id,
-        });
-        await group.save();
-        await finalizeGroupIfFull(group);
-        return group;
+        group.tolerance -= diffMins;
       } else if (diffMins < 0 && Math.abs(diffMins) <= newRequest.tolerance) {
         group.tolerance = newRequest.tolerance - Math.abs(diffMins);
-        group.members.push({
-          userId: newRequest.userId,
-          requestId: newRequest._id,
-        });
-        await group.save();
-        await finalizeGroupIfFull(group);
-        return group;
-      }
+      } else continue;
     } else {
       if (diffMins <= 0 && Math.abs(diffMins) <= group.tolerance) {
         group.journeyTime = newRequest.journeyTime;
-        group.tolerance = group.tolerance - Math.abs(diffMins);
-        group.members.push({
-          userId: newRequest.userId,
-          requestId: newRequest._id,
-        });
-        await group.save();
-        await finalizeGroupIfFull(group);
-        return group;
+        group.tolerance -= Math.abs(diffMins);
       } else if (diffMins > 0 && diffMins <= newRequest.tolerance) {
         group.tolerance = newRequest.tolerance - diffMins;
-        group.members.push({
-          userId: newRequest.userId,
-          requestId: newRequest._id,
-        });
-        await group.save();
-        await finalizeGroupIfFull(group);
-        return group;
-      }
+      } else continue;
     }
+
+    group.members.push({
+      userId: newRequest.userId,
+      requestId: newRequest._id,
+    });
+
+    await group.save();
+    await finalizeGroupIfFull(group);
+    return group;
   }
 
   const newGroup = new Group({
+    transport: "flight",
     direction: newRequest.direction,
     journeyDate: newRequest.journeyDate,
     journeyTime: newRequest.journeyTime,
@@ -144,6 +165,7 @@ const makeGroup = async (newRequest) => {
     status: "forming",
     members: [{ userId: newRequest.userId, requestId: newRequest._id }],
   });
+
   await newGroup.save();
   return newGroup;
 };

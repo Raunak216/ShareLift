@@ -9,7 +9,19 @@ const RideReqSchema = new Schema({
   },
   direction: { type: String, required: true },
   journeyDate: { type: Date, required: true },
-  journeyTime: { type: String, required: true },
+  journeyTime: {
+    type: String,
+    required: function () {
+      return this.transport === "flight";
+    },
+  },
+  transport: { type: String, enum: ["flight", "train"], required: true },
+  trainNumber: {
+    type: String,
+    required: function () {
+      return this.transport === "train";
+    },
+  },
   vehicleCapacity: { type: Number, default: 2 },
   tolerance: { type: Number, default: 60 },
   status: {
