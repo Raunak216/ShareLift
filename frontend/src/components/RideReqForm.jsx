@@ -110,6 +110,7 @@ function RideRequestForm() {
               <option value="ChennaiAirtoVit">Chennai Airport → VIT-v</option>
               <option value="vitToKatpadiRail">VIT-v → Katpadi Railway</option>
               <option value="KatpadiRailToVit">Katpadi Railway → VIT-v</option>
+              <option value="BlrToVit">Bengluru Airport → VIT-v</option>
             </select>
             {errors.direction && (
               <p className="text-red-400 text-[11px] ">

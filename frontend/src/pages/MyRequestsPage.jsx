@@ -24,6 +24,7 @@ const ActiveRequestCard = ({ request, user, onDeleteSuccess }) => {
     ChennaiAirtoVit: "Chennai Airport → VIT-v",
     vitToKatpadiRail: "VIT-v → Katpadi Railway",
     KatpadiRailToVit: "Katpadi Railway → VIT-v",
+    BlrToVit: "Bengluru Airport → VIT-v",
   };
 
   const readableDate = new Date(journeyDate).toLocaleDateString("en-IN", {
