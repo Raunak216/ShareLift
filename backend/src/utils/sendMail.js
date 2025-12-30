@@ -26,12 +26,12 @@ async function sendAdminAlert(subject, text) {
     );
   }
 }
+
 const sendMailHelper = async (params) => {
   try {
     return await transporter.sendMail(params);
   } catch (err) {
     const msg = err.message || "";
-
     const isQuotaError = /quota|Daily sending|4\.7\.0|5\.4\.5/i.test(msg);
 
     if (isQuotaError) {
@@ -61,20 +61,26 @@ export async function sendGroupFormedMail({
   trainNumber,
   groupMembers,
 }) {
+  // Card Layout
+
   const memberListHTML = groupMembers
     .map(
       (m, i) => `
-      <tr>
-        <td style="padding:10px; border-bottom:1px solid #eeeeee; font-size:14px;">${
-          i + 1
-        }</td>
-        <td style="padding:10px; border-bottom:1px solid #eeeeee; font-size:14px;"><strong>${
-          m.name
-        }</strong></td>
-        <td style="padding:10px; border-bottom:1px solid #eeeeee; font-size:14px; color:#555555;">${
-          m.phone
-        }</td>
-      </tr>`
+    <div style="border-bottom: 1px solid #eeeeee; padding: 12px 0;">
+      <div style="font-weight: bold; color: #333; font-size: 16px;">
+        ${i + 1}. ${m.name}
+      </div>
+      <div style="margin-top: 4px; color: #555; font-size: 14px;">
+        📞 ${m.phone}
+      </div>
+      <div style="margin-top: 2px;">
+        ✉️ <a href="mailto:${
+          m.email
+        }" style="color: #2b6cb0; text-decoration: none; font-size: 14px; word-break: break-all;">
+          ${m.email}
+        </a>
+      </div>
+    </div>`
     )
     .join("");
 
@@ -85,63 +91,57 @@ export async function sendGroupFormedMail({
     : `<p style="margin: 5px 0;"><strong>⏰ Time:</strong> ${journeyTime}</p>`;
 
   const html = `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-      <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-        <div style="background-color: #2b6cb0; padding: 20px; text-align: center; color: #ffffff;">
-          <h1 style="margin: 0; font-size: 24px;">Group Formed! 🚕</h1>
-        </div>
-        <div style="padding: 30px;">
-          <p style="font-size: 16px; color: #333;">Hi <strong>${userName}</strong>,</p>
-          <p style="font-size: 16px; color: #555; line-height: 1.5;">Great news! Your travel group has been successfully formed.</p>
-          <div style="background: #edf2f7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>📍 Direction:</strong> ${journeyDirection}</p>
-            <p style="margin: 5px 0;"><strong>📅 Date:</strong> ${journeyDate}</p>
-            ${journeyInfoHTML}
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4;">
+      
+      <div style="width: 100%; background-color: #f4f4f4; padding: 20px 0;">
+        
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 90%;">
+          
+          <div style="background-color: #2b6cb0; padding: 25px 20px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 700;">Group Formed! 🚕</h1>
           </div>
 
-          <p style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">Group Contact Details:</p>
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="text-align: left; background-color: #f8fafc;">
-                <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">#</th>
-                <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Name</th>
-                <th style="padding: 10px; border-bottom: 2px solid #e2e8f0;">Phone</th>
-              </tr>
-            </thead>
-            <tbody>
+          <div style="padding: 25px;">
+            <p style="font-size: 16px; color: #333; margin-top: 0;">Hi <strong>${userName}</strong>,</p>
+            <p style="font-size: 16px; color: #555; line-height: 1.6;">Great news! Your travel group has been successfully formed.</p>
+            
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin: 20px 0;">
+              <p style="margin: 5px 0; color: #4a5568;"><strong>📍 Direction:</strong> ${journeyDirection}</p>
+              <p style="margin: 5px 0; color: #4a5568;"><strong>📅 Date:</strong> ${journeyDate}</p>
+              ${journeyInfoHTML}
+            </div>
+
+            <p style="font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #2b6cb0; display: inline-block; padding-bottom: 5px;">Group Contact Details:</p>
+            
+            <div style="width: 100%;">
               ${memberListHTML}
-            </tbody>
-          </table>
+            </div>
 
-          <p style="
-  margin-top: 24px;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #444444;
-  background-color: #f8fafc;
-  padding: 14px 16px;
-  border-radius: 8px;
-  border-left: 4px solid #2b6cb0;
-">
-  You can now connect with your group members using the contact details above
-  to coordinate your travel plans smoothly and ensure a hassle-free journey.
-</p>
+            <div style="margin-top: 24px; font-size: 14px; line-height: 1.6; color: #444; background-color: #ebf8ff; padding: 15px; border-radius: 6px; border-left: 4px solid #2b6cb0;">
+              You can now connect with your group members using the contact details above to coordinate your travel plans.
+            </div>
 
-          <p style="margin-top: 30px; font-size: 14px; color: #777; text-align: center;">
-            Safe travels!<br/><strong>The ShareLift Team</strong>
-          </p>
+            <p style="margin-top: 30px; font-size: 14px; color: #888; text-align: center;">
+              Safe travels!<br/><strong>The ShareLift Team</strong>
+            </p>
+          </div>
         </div>
       </div>
-    </div>`;
+    </body>
+    </html>`;
 
   return sendMailHelper({
     from: { name: "ShareLift", address: process.env.EMAIL_USERNAME },
     to: recipientEmail,
-    subject: "Your Group is Formed",
+    subject: "Your Group is Formed ",
     html,
-    text: `Hi ${userName}, your group for ${journeyDirection} on ${journeyDate} is formed! Members: ${groupMembers
-      .map((m) => m.name)
-      .join(", ")}`,
+    text: `Hi ${userName}, your group for ${journeyDirection} on ${journeyDate} is formed! Check your email for contact details.`,
   });
 }
 
