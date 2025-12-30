@@ -133,9 +133,11 @@ function RideRequestForm() {
               </label>
               <input
                 type="date"
+                min={new Date().toISOString().split("T")[0]}
                 {...register("journeyDate", { required: true })}
                 className="w-full border border-white/20 rounded-md px-2 py-1.5 text-sm bg-white/6 text-white"
               />
+
               {errors.journeyDate && (
                 <p className="text-red-400 text-[11px]">
                   Journey Date is required.
