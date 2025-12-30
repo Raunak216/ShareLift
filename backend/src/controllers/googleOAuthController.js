@@ -59,11 +59,11 @@ const googleAuthHandler = async (req, res, next) => {
     };
 
     //  VIT users only
-    // if (googleUser.hd !== "vitstudent.ac.in") {
-    //   return res.redirect(
-    //     `${process.env.FRONTEND_HOME_URL}/auth-error?msg=only-vit-allowed`
-    //   );
-    // }
+    if (googleUser.hd !== "vitstudent.ac.in") {
+      return res.redirect(
+        `${process.env.FRONTEND_HOME_URL}/auth-error?msg=only-vit-allowed`
+      );
+    }
 
     //   update user DB
     const updatedUser = await User.findOneAndUpdate(
