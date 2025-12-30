@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import NavBar from "../components/Navbar";
 import { useAuth } from "../Contexts/AuthContext";
-import { Clock, MapPin, Users, CheckCircle } from "lucide-react";
+import { Clock, MapPin, Users, CheckCircle, Info } from "lucide-react";
 import axios from "../axiosConfig.js";
 import { LoadingAnimation } from "../components/loader.jsx";
 
@@ -102,17 +102,14 @@ const ActiveRequestCard = ({ request, user, onDeleteSuccess }) => {
           </h4>
           <div className="flex justify-between">
             <DetailRow Icon={Users} label="Total Seats" value={totalSeats} />
-            {/* {request.members.length === totalSeats ? (
-              <></>
-            ) : (
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className=" py-2 px-4  border border-green-400/40 text-white-500 font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed "
-              >
-                {isDeleting ? "Processing..." : "Leave Group "}
-              </button>
-            )} */}
+
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className=" py-2 px-4  border border-green-400/40 text-white-500 font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] disabled:opacity-50 disabled:cursor-not-allowed "
+            >
+              {isDeleting ? "Processing..." : "Leave Group "}
+            </button>
           </div>
 
           {isPending ? (

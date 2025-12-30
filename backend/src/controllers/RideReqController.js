@@ -73,7 +73,7 @@ const requestRide = asyncHandler(async (req, res, next) => {
     status: { $in: ["pending", "formed"] },
   });
   if (activeReq) {
-    const error = new Error("You already have an active ride request");
+    const error = new Error("You already have an active request");
     error.statusCode = httpStatus.CONFLICT;
     error.data = { requestId: activeReq._id };
     throw error;
@@ -105,44 +105,65 @@ const requestRide = asyncHandler(async (req, res, next) => {
   });
 });
 
-const deleteRequest = asyncHandler(async (req, res, next) => {
+const deleteRequest = asyncHandler(async (req, res) => {
   const groupId = req.params.id;
-  const { userId } = req.query;
+  const userId = req.userId;
 
-  if (!userId) {
-    return res.status(400).json({ message: "User ID is required" });
-  }
-  let groupInfo = await Group.findOne({ _id: groupId });
-  if (!groupInfo) {
-    return res.status(404).json({ message: "Group not found or not forming" });
+  const group = await Group.findById(groupId);
+  if (!group) {
+    return res.status(404).json({ message: "Group not found" });
   }
 
-  if (groupInfo.members.length >= groupInfo.totalSeats) {
-    return res.status(400).json({ message: "Group is already confirmed" });
+  if (group.status === "finalized") {
+    return res.status(400).json({
+      message:
+        "This group is already finalized. Please use the Contact Us section on the home page to request a cancellation.",
+    });
   }
-  const updatedGroup = await Group.findByIdAndUpdate(
-    groupId,
-    { $pull: { members: { userId: userId } } },
-    { new: true }
+
+  const memberIndex = group.members.findIndex(
+    (m) => m.userId.toString() === userId
   );
 
-  if (updatedGroup && updatedGroup.members.length === 0) {
+  if (memberIndex === -1) {
+    return res.status(400).json({ message: "User not in group" });
+  }
+
+  const leavingMember = group.members[memberIndex];
+  group.members.splice(memberIndex, 1);
+
+  /* Group empty  */
+  if (group.members.length === 0) {
     await Group.deleteOne({ _id: groupId });
-    console.log(`Group ${groupId} deleted because it became empty.`);
+
+    await RideReq.findByIdAndUpdate(leavingMember.requestId, {
+      status: "cancelled",
+    });
+
+    return res.json({
+      message: "Group deleted and request cancelled",
+    });
   }
 
-  await RideReq.updateOne(
-    { userId: userId, status: "pending" },
-    {
-      $set: {
-        status: "cancelled",
-      },
-    }
-  );
+  // One member left
+  if (group.members.length === 1 && group.transport === "flight") {
+    const remainingReq = await RideReq.findById(group.members[0].requestId);
 
-  res.status(200).json({
-    success: true,
-    message: "Member removed and request cancelled.",
+    // Reset tolerance
+    group.tolerance = remainingReq.tolerance;
+    group.journeyTime = remainingReq.journeyTime;
+  }
+
+  await group.save();
+
+  await RideReq.findByIdAndUpdate(leavingMember.requestId, {
+    status: "cancelled",
+  });
+
+  return res.json({
+    message: "Left group successfully",
+    remainingMembers: group.members.length,
   });
 });
+
 export { requestRide, deleteRequest };
