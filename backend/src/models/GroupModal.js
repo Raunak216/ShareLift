@@ -30,6 +30,10 @@ const GroupSchema = new Schema({
     enum: ["forming", "finalized", "cancelled", "expired/Partial"],
     default: "forming",
   },
+  partialNotified: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

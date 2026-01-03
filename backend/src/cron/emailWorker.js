@@ -2,90 +2,80 @@ import cron from "node-cron";
 import EmailQueue from "../models/EmailQueueModal.js";
 import EmailLog from "../models/EmailLog.js";
 import SystemState from "../models/SystemState.js";
-import { sendGroupFormedMail } from "../utils/sendMail.js";
 
-const EMAIL_TYPE_MAP = { GROUP_FORMED: sendGroupFormedMail };
+import {
+  sendGroupFormedMail,
+  sendPartialMail,
+  // sendRegretMail,
+} from "../utils/sendMail.js";
 
-const getQuotaStatus = async () => {
-  const state = await SystemState.findOne({ key: "gmail_quota_exceeded" });
-  return state ? state.value : false;
+const EMAIL_TYPE_MAP = {
+  GROUP_FORMED: sendGroupFormedMail,
+  PARTIAL: sendPartialMail,
+  // REGRET: sendRegretMail
 };
 
-const setQuotaStatus = async (status) => {
+const getQuotaStatus = async () => {
+  const s = await SystemState.findOne({ key: "gmail_quota_exceeded" });
+  return s?.value || false;
+};
+
+const setQuotaStatus = async (v) => {
   await SystemState.findOneAndUpdate(
     { key: "gmail_quota_exceeded" },
-    { value: status, updatedAt: new Date() },
+    { value: v, updatedAt: new Date() },
     { upsert: true }
   );
 };
 
-cron.schedule("0 0 * * *", async () => {
-  await setQuotaStatus(false);
-  console.log("Database: Daily quota flag reset.");
-});
+cron.schedule("*/50 * * * * *", async () => {
+  if (await getQuotaStatus()) return;
 
-cron.schedule("*/51 * * * * *", async () => {
-  const isPaused = await getQuotaStatus();
-  if (isPaused) return;
+  const email = await EmailQueue.findOneAndUpdate(
+    { status: "PENDING", attempts: { $lt: 3 } },
+    { status: "PROCESSING" },
+    { sort: { createdAt: 1 }, new: true }
+  );
+
+  if (!email) return;
 
   try {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    const handler = EMAIL_TYPE_MAP[email.emailType];
 
-    const todaysCount = await EmailLog.countDocuments({
-      sentAt: { $gte: startOfDay },
+    if (!handler) {
+      console.error("No handler for email type:", email.emailType);
+      await EmailQueue.updateOne(
+        { _id: email._id },
+        { status: "FAILED_PERMANENTLY", errorMsg: "No handler found" }
+      );
+      return;
+    }
+    await handler({ recipientEmail: email.recipientEmail, ...email.payload });
+
+    await EmailLog.create({
+      emailType: email.emailType,
+      recipientEmail: email.recipientEmail,
+      sentAt: new Date(),
     });
 
-    if (todaysCount >= 432) {
-      console.log("Daily limit reached.");
+    await EmailQueue.deleteOne({ _id: email._id });
+  } catch (err) {
+    const msg = err.message || "";
+    const quota = /quota|4\.7\.0|5\.4\.5/i.test(msg);
+
+    if (quota) {
       await setQuotaStatus(true);
+      await EmailQueue.updateOne({ _id: email._id }, { status: "PENDING" });
       return;
     }
 
-    const email = await EmailQueue.findOneAndUpdate(
-      { status: "PENDING", attempts: { $lt: 3 } },
-      { $set: { status: "PROCESSING" } },
-      { sort: { createdAt: 1 }, new: true }
-    );
-
-    if (!email) return;
-
-    try {
-      const handler = EMAIL_TYPE_MAP[email.emailType];
-      await handler({ recipientEmail: email.recipientEmail, ...email.payload });
-
-      await EmailLog.create({
-        emailType: email.emailType,
-        recipientEmail: email.recipientEmail,
-        sentAt: new Date(),
-      });
-      await EmailQueue.deleteOne({ _id: email._id });
-    } catch (err) {
-      const msg = err.message || "";
-      const isQuotaError = /quota|Daily sending|4\.7\.0|5\.4\.5/i.test(msg);
-
-      if (isQuotaError) {
-        await setQuotaStatus(true);
-        await EmailQueue.updateOne(
-          { _id: email._id },
-          { $set: { status: "PENDING" } }
-        );
-        return;
+    await EmailQueue.updateOne(
+      { _id: email._id },
+      {
+        $inc: { attempts: 1 },
+        status: email.attempts >= 2 ? "FAILED_PERMANENTLY" : "PENDING",
+        errorMsg: msg,
       }
-
-      const nextAttempts = (email.attempts || 0) + 1;
-      await EmailQueue.updateOne(
-        { _id: email._id },
-        {
-          $set: {
-            status: nextAttempts >= 3 ? "FAILED_PERMANENTLY" : "PENDING",
-            errorMsg: msg,
-          },
-          $inc: { attempts: 1 },
-        }
-      );
-    }
-  } catch (globalErr) {
-    console.error("Worker Error:", globalErr);
+    );
   }
 });

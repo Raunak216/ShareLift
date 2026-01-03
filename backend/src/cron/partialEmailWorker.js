@@ -3,80 +3,97 @@ import { Group } from "../models/GroupModal.js";
 import { User } from "../models/UserModal.js";
 import EmailQueue from "../models/EmailQueueModal.js";
 
-//  CRON JOB —  ERROR
-cron.schedule("*/1 * * * *", async () => {
+cron.schedule("*/5 * * * *", async () => {
   const now = new Date();
 
   try {
-    const formingGroups = await Group.find({ status: "forming" });
+    const groups = await Group.find({
+      status: "forming",
+      partialNotified: false,
+    });
 
-    for (let group of formingGroups) {
-      const createdAt = new Date(group.createdAt);
-      const groupTime = new Date(
-        `${group.journeyDate.toISOString().split("T")[0]} ${group.journeyTime}`
-      );
+    for (const group of groups) {
+      let expiryTime = null;
 
-      const totalTimeGap = groupTime.getTime() - createdAt.getTime();
+      /* ========= FLIGHT ========= */
+      if (group.transport === "flight") {
+        if (!group.journeyTime) continue;
 
-      const eightyPercentTime = new Date(
-        createdAt.getTime() + 0.8 * totalTimeGap
-      );
+        const d = new Date(group.journeyDate);
+        const [hh, mm] = group.journeyTime.split(":").map(Number);
 
-      const twoHoursBeforeJourney = new Date(
-        groupTime.getTime() - 2 * 60 * 60 * 1000
-      );
+        const journeyDateTime = new Date(
+          d.getFullYear(),
+          d.getMonth(),
+          d.getDate(),
+          hh,
+          mm,
+          0
+        );
 
-      const expiryTime =
-        eightyPercentTime < twoHoursBeforeJourney
-          ? eightyPercentTime
-          : twoHoursBeforeJourney;
-
-      if (expiryTime <= now) {
-        if (group.members.length > 1) {
-          const memberDetails = await Promise.all(
-            group.members.map(async (m) => {
-              const u = await User.findById(m.userId).select(
-                "name email phone"
-              );
-              return { name: u.name, email: u.email, phone: u.phone };
-            })
-          );
-          for (const m of memberDetails) {
-            await EmailQueue.create({
-              recipientEmail: m.email,
-              emailType: "PARTIAL",
-              payload: {
-                userName: m.name,
-                journeyDirection: group.direction,
-                journeyDate: group.journeyDate,
-                journeyTime: group.journeyTime,
-                groupMembers: memberDetails,
-              },
-            });
-          }
-          console.log("Queued PARTIAL emails");
-        } else {
-          for (const member of group.members) {
-            const u = await User.findById(member.userId).select("name email");
-            await EmailQueue.create({
-              recipientEmail: u.email,
-              emailType: "REGRET",
-              payload: {
-                userName: u.name,
-                journeyDirection: group.direction,
-                journeyDate: group.journeyDate,
-                journeyTime: group.journeyTime,
-              },
-            });
-            console.log("Queued REGRET email:", u.email);
-          }
-        }
-
-        group.status = "expired/Partial";
-        await group.save();
+        expiryTime = new Date(journeyDateTime.getTime() - 2 * 60 * 60 * 1000);
       }
+
+      /*  TRAIN  */
+      if (group.transport === "train") {
+        const d = new Date(group.journeyDate);
+        expiryTime = new Date(
+          d.getFullYear(),
+          d.getMonth(),
+          d.getDate(),
+          23,
+          59,
+          59
+        );
+      }
+
+      if (!expiryTime || expiryTime > now) continue;
+
+      /* ========= EMAIL ========= */
+      if (group.members.length > 1) {
+        const members = await Promise.all(
+          group.members.map(async (m) => {
+            const u = await User.findById(m.userId).select("name email phone");
+            return {
+              name: u.name,
+              email: u.email,
+              phone: u.phone,
+            };
+          })
+        );
+
+        for (const m of members) {
+          await EmailQueue.create({
+            recipientEmail: m.email,
+            emailType: "PARTIAL",
+            payload: {
+              userName: m.name,
+              journeyDirection: group.direction,
+              journeyDate: group.journeyDate,
+              journeyTime: group.journeyTime,
+              groupMembers: members,
+            },
+          });
+        }
+      } else {
+        // const member = group.members[0];
+        // const u = await User.findById(member.userId).select("name email");
+        // await EmailQueue.create({
+        //   recipientEmail: u.email,
+        //   emailType: "REGRET",
+        //   payload: {
+        //     userName: u.name,
+        //     journeyDirection: group.direction,
+        //     journeyDate: group.journeyDate,
+        //   },
+        // });
+      }
+
+      group.status = "expired/Partial";
+      group.partialNotified = true;
+      await group.save();
     }
   } catch (err) {
-    console.error("Error running partial group cron:", err);
+    console.error("PARTIAL CRON ERROR:", err);
   }
 });
