@@ -3,7 +3,7 @@ import { Group } from "../models/GroupModal.js";
 import { User } from "../models/UserModal.js";
 import EmailQueue from "../models/EmailQueueModal.js";
 
-cron.schedule("*/5 * * * *", async () => {
+cron.schedule("*/50 * * * *", async () => {
   const now = new Date();
 
   try {
@@ -51,30 +51,29 @@ cron.schedule("*/5 * * * *", async () => {
 
       /* ========= EMAIL ========= */
       if (group.members.length > 1) {
-        const members = await Promise.all(
-          group.members.map(async (m) => {
-            const u = await User.findById(m.userId).select("name email phone");
-            return {
-              name: u.name,
-              email: u.email,
-              phone: u.phone,
-            };
-          })
-        );
-
-        for (const m of members) {
-          await EmailQueue.create({
-            recipientEmail: m.email,
-            emailType: "PARTIAL",
-            payload: {
-              userName: m.name,
-              journeyDirection: group.direction,
-              journeyDate: group.journeyDate,
-              journeyTime: group.journeyTime,
-              groupMembers: members,
-            },
-          });
-        }
+        // const members = await Promise.all(
+        //   group.members.map(async (m) => {
+        //     const u = await User.findById(m.userId).select("name email phone");
+        //     return {
+        //       name: u.name,
+        //       email: u.email,
+        //       phone: u.phone,
+        //     };
+        //   })
+        // );
+        // for (const m of members) {
+        //   await EmailQueue.create({
+        //     recipientEmail: m.email,
+        //     emailType: "PARTIAL",
+        //     payload: {
+        //       userName: m.name,
+        //       journeyDirection: group.direction,
+        //       journeyDate: group.journeyDate,
+        //       journeyTime: group.journeyTime,
+        //       groupMembers: members,
+        //     },
+        //   });
+        // }
       } else {
         // const member = group.members[0];
         // const u = await User.findById(member.userId).select("name email");
