@@ -22,7 +22,7 @@ const finalizeGroupIfFull = async (group) => {
     const memberIds = group.members.map((m) => m.userId);
     await RideReq.updateMany(
       { userId: { $in: memberIds } },
-      { $set: { status: "formed" } }
+      { $set: { status: "formed" } },
     );
 
     const journeyDirection = directionMap[group.direction] || group.direction;
@@ -33,7 +33,7 @@ const finalizeGroupIfFull = async (group) => {
         year: "numeric",
         month: "long",
         day: "numeric",
-      }
+      },
     );
 
     const groupMembers = await Promise.all(
@@ -44,7 +44,7 @@ const finalizeGroupIfFull = async (group) => {
           email: u?.email || "NotAvailable",
           phone: u?.phone || "0000000000",
         };
-      })
+      }),
     );
 
     for (const member of groupMembers) {
@@ -67,7 +67,7 @@ const finalizeGroupIfFull = async (group) => {
       });
     }
 
-    console.log("Queued GROUP_FORMED emails for group");
+    // console.log("Queued GROUP_FORMED emails for group");
   } catch (err) {
     console.error("Error finalizing group:", err);
   }
@@ -120,12 +120,12 @@ const makeGroup = async (newRequest) => {
 
   for (let group of allGroups) {
     const groupTime = new Date(
-      `${group.journeyDate.toISOString().split("T")[0]} ${group.journeyTime}`
+      `${group.journeyDate.toISOString().split("T")[0]} ${group.journeyTime}`,
     );
     const reqTime = new Date(
       `${newRequest.journeyDate.toISOString().split("T")[0]} ${
         newRequest.journeyTime
-      }`
+      }`,
     );
 
     const diffMins = (groupTime - reqTime) / (1000 * 60);

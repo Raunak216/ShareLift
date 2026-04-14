@@ -23,7 +23,7 @@ app.use(
     credentials: true,
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  })
+  }),
 );
 
 app.use(express.json());
@@ -51,7 +51,7 @@ async function main() {
     console.log("MongoDB connected ");
     app.listen(port, () => {
       console.log(
-        `****************APP is Listening on port ${port}******************`
+        `****************APP is Listening on port ${port}******************`,
       );
     });
   } catch (error) {

@@ -24,7 +24,7 @@ const setQuotaStatus = async (v) => {
   await SystemState.findOneAndUpdate(
     { key: "gmail_quota_exceeded" },
     { value: v, updatedAt: new Date() },
-    { upsert: true }
+    { upsert: true },
   );
 };
 
@@ -34,7 +34,7 @@ cron.schedule("*/50 * * * * *", async () => {
   const email = await EmailQueue.findOneAndUpdate(
     { status: "PENDING", attempts: { $lt: 3 } },
     { status: "PROCESSING" },
-    { sort: { createdAt: 1 }, new: true }
+    { sort: { createdAt: 1 }, new: true },
   );
 
   if (!email) return;
@@ -43,10 +43,10 @@ cron.schedule("*/50 * * * * *", async () => {
     const handler = EMAIL_TYPE_MAP[email.emailType];
 
     if (!handler) {
-      console.error("No handler for email type:", email.emailType);
+      // console.error("No handler for email type:", email.emailType);
       await EmailQueue.updateOne(
         { _id: email._id },
-        { status: "FAILED_PERMANENTLY", errorMsg: "No handler found" }
+        { status: "FAILED_PERMANENTLY", errorMsg: "No handler found" },
       );
       return;
     }
@@ -75,7 +75,7 @@ cron.schedule("*/50 * * * * *", async () => {
         $inc: { attempts: 1 },
         status: email.attempts >= 2 ? "FAILED_PERMANENTLY" : "PENDING",
         errorMsg: msg,
-      }
+      },
     );
   }
 });

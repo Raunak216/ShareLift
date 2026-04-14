@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 const typeWritterData = [
-  "Winter holidays coming to an end?",
-  "Heading back to VIT - booking a cab?",
+  "Going home for Summer Holidays?",
+  "Booking a cab to airport or station?",
   "Looking to split up the fare?",
 ];
 
@@ -23,14 +23,14 @@ function Typewriter() {
     if (!isDeleting && text.length < current.length) {
       timer = setTimeout(
         () => setText(current.slice(0, text.length + 1)),
-        TYPING_SPEED
+        TYPING_SPEED,
       );
     } else if (!isDeleting && text.length === current.length) {
       timer = setTimeout(() => setIsDeleting(true), DELAY_BEFORE_ERASE);
     } else if (isDeleting && text.length > 0) {
       timer = setTimeout(
         () => setText(current.slice(0, text.length - 1)),
-        ERASING_SPEED
+        ERASING_SPEED,
       );
     } else if (isDeleting && text.length === 0) {
       timer = setTimeout(() => {

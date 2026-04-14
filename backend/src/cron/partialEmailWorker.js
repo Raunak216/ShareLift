@@ -28,7 +28,7 @@ cron.schedule("*/50 * * * *", async () => {
           d.getDate(),
           hh,
           mm,
-          0
+          0,
         );
 
         expiryTime = new Date(journeyDateTime.getTime() - 2 * 60 * 60 * 1000);
@@ -43,7 +43,7 @@ cron.schedule("*/50 * * * *", async () => {
           d.getDate(),
           23,
           59,
-          59
+          59,
         );
       }
 

@@ -18,11 +18,11 @@ async function sendAdminAlert(subject, text) {
       subject: ` ${subject}`,
       text: `${text}\n\nTimestamp: ${new Date().toLocaleString("en-IN")}`,
     });
-    console.log("Admin alert sent successfully.");
+    // console.log("Admin alert sent successfully.");
   } catch (err) {
     console.error(
       "CRITICAL: SMTP is likely blocked. Could not send Admin Alert:",
-      err.message
+      err.message,
     );
   }
 }
@@ -35,15 +35,15 @@ const sendMailHelper = async (params) => {
     const isQuotaError = /quota|Daily sending|4\.7\.0|5\.4\.5/i.test(msg);
 
     if (isQuotaError) {
-      console.error("Gmail Quota Exceeded. Triggering Admin Alert...");
+      // console.error("Gmail Quota Exceeded. Triggering Admin Alert...");
       await sendAdminAlert(
         "Gmail Quota Exceeded",
-        "The daily sending limit for Gmail has been reached. The email worker will pause operations until the next reset."
+        "The daily sending limit for Gmail has been reached. The email worker will pause operations until the next reset.",
       );
     } else {
       await sendAdminAlert(
         "Email Delivery Failed",
-        `An email to ${params.to} failed.\nError: ${msg}`
+        `An email to ${params.to} failed.\nError: ${msg}`,
       );
     }
 
@@ -80,7 +80,7 @@ export async function sendGroupFormedMail({
           ${m.email}
         </a>
       </div>
-    </div>`
+    </div>`,
     )
     .join("");
 
@@ -153,7 +153,8 @@ export async function sendPartialMail({
   <p>Current members:</p>
   ${groupMembers
     .map(
-      (m, i) => `<p>${i + 1}. ${m.name}<br/>📞 ${m.phone}<br/>✉️ ${m.email}</p>`
+      (m, i) =>
+        `<p>${i + 1}. ${m.name}<br/>📞 ${m.phone}<br/>✉️ ${m.email}</p>`,
     )
     .join("")}
   <p>We’ll notify you if more members join.</p>
